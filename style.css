@@ -50,6 +50,7 @@ th, td {
 #announcement {
     font-size: 100px;
     margin: 10px;
+    font-weight:500;
 }
 
 #scoreboard {
@@ -59,11 +60,32 @@ th, td {
     justify-content: space-between;
 }
 
-#scoreboard p {
-    margin-left: 250px;
-    margin-right: 250px;
-}
-
 p {
     margin: 5px;
+}
+
+.side {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-left: 150px;
+    margin-right: 150px;
+}
+
+#X, #XScore{
+    color: red;
+}
+
+#O, #OScore{
+    color: blue;
+}
+
+#reset {
+    width: 200px;
+    height: 150px;
+    font-size: 48px;
+    background-color: yellow;
+    color:purple;
+    visibility: hidden;
 }

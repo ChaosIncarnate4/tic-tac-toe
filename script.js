@@ -25,7 +25,6 @@ function Gameboard() {
                 count++;
             }
         }
-        console.log(board);
     }
     
     const addToken = (token, index) => {
@@ -42,20 +41,31 @@ function GameController(gb) {
     let currentPlayer = 'X';
     let won = false;
     const winningLines = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+    let xScore = 0;
+    let oScore = 0;
 
     const checkWin = () => {
         for (let line of winningLines) {
             if (line.every(i => gb.board[i] === currentPlayer)) {
                 console.log(`${currentPlayer} Wins!`);
                 document.getElementById('announcement').textContent = `${currentPlayer} Wins!`;
+                if (currentPlayer === 'X') {
+                    xScore++;
+                    document.getElementById('XScore').innerHTML = xScore;
+                } else {
+                    oScore++;
+                    document.getElementById('OScore').innerHTML = oScore;
+                }
+                console.log(xScore, oScore);
                 won = true;
+                document.getElementById('reset').style.visibility = 'visible';
                 return;
             }
         }
         if (gb.board.every(cell => cell !== '')) {
-            console.log("Draw!");
             document.getElementById('announcement').textContent = "Draw!";
             won = true;
+            document.getElementById('reset').style.visibility = 'visible';
         }
     }
 
@@ -70,14 +80,24 @@ function GameController(gb) {
         }
     }
 
+    const reset = () => {
+        gb.board.fill('');
+        gb.buttons.forEach(button => button.textContent = ' ');
+        currentPlayer = 'X';
+        won = false;
+        document.getElementById('announcement').textContent = "X's Turn!";
+        document.getElementById('reset').style.visibility = 'hidden';
+    }
+
     // Set onclick for buttons
     gb.buttons.forEach((button, index) => {
         button.onclick = () => makeMove(index);
     });
 
-    return { makeMove, checkWin };
+    return { makeMove, checkWin, reset };
 }
 
 let gb = Gameboard();
 gb.displayBoard();
 let gc = GameController(gb);
+document.getElementById('reset').onclick = gc.reset;
