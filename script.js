@@ -1,69 +1,83 @@
-const prompt = require('prompt-sync')();
+function Gameboard() {
+    let board = Array(9).fill('');
+    let buttons = [];
 
-function Board() {
-    let board = [['', '', ''], ['', '', ''], ['', '', '']];
-    const addToken = (token, row, col) => {
-        token==='X' ? board[row][col] = 'X' : board[row][col] = 'O';
-    }
-    return board;
-}
+    const displayBoard = () => {
+        const tableBody = document.getElementById('board');
+        tableBody.innerHTML = '';  // Destroy current board
+        let count = 0;
 
-const winningLines = new Set([[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 4, 7], [2, 5, 8], [3, 6, 9], [3, 5, 7], [1, 5, 9]]);
-const board = new Map();
-board.set(1, false);
-board.set(2, false);
-board.set(3, false);
-board.set(4, false);
-board.set(5, false);
-board.set(6, false);
-board.set(7, false);
-board.set(8, false);
-board.set(9, false);
-let won = false;
-let turnCount = 1;
-let xTurn = true;
-let xBoxes = [];
-let oBoxes = [];
+        for (let r = 0; r < 3; r++) {
+            let row = tableBody.insertRow();
+            row.classList.add('grid-row')
 
-function GameController() {
-    while (!won && turnCount < 10) {
-        if (xTurn) {
-            let xCell = parseInt(prompt("X's turn; enter a grid number: "));
-            while (xCell < 1 || xCell > 9 || !Number.isInteger(xCell) || board.get(xCell)) {
-                xCell = parseInt(prompt("Please enter a valid grid number: "));
+            for (let c = 0; c < 3; c++) {
+                let cell = row.insertCell();
+                cell.classList.add('grid-cell')
+
+                let button = document.createElement('button');
+                button.classList.add('grid-button');
+                
+                button.textContent = board[count] || ' ';
+                buttons[count] = button;
+                cell.appendChild(button);
+
+                count++;
             }
-            board.set(xCell, true);
-            xBoxes.push(xCell);
-            xTurn = false;
-
-            //check win condition here
-            winningLines.forEach((line) => {
-                if (line.every(x => xBoxes.includes(x))) {
-                    console.log("X Wins!");
-                    won = true;
-                }
-            })
-        } else { 
-            let oCell = parseInt(prompt("O's turn; enter a grid number: ")); 
-            while (oCell < 1 || oCell > 9 || !Number.isInteger(oCell) || board.get(oCell)) {
-                oCell = parseInt(prompt("Please enter a valid grid number: "));
-            }
-            board.set(oCell, true);
-            oBoxes.push(oCell);
-            xTurn = true;
-
-            winningLines.forEach((line) => {
-                if (line.every(o => oBoxes.includes(o))) {
-                    console.log("O Wins!");
-                    won = true;
-                }
-            })
         }
-
-        turnCount++;
-
-        
+        console.log(board);
     }
+    
+    const addToken = (token, index) => {
+        if (board[index] === '') {
+            board[index] = token;
+            buttons[index].textContent = token;
+        }
+    }
+
+    return { board, buttons, displayBoard, addToken };
 }
 
-GameController()
+function GameController(gb) {
+    let currentPlayer = 'X';
+    let won = false;
+    const winningLines = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+
+    const checkWin = () => {
+        for (let line of winningLines) {
+            if (line.every(i => gb.board[i] === currentPlayer)) {
+                console.log(`${currentPlayer} Wins!`);
+                document.getElementById('announcement').textContent = `${currentPlayer} Wins!`;
+                won = true;
+                return;
+            }
+        }
+        if (gb.board.every(cell => cell !== '')) {
+            console.log("Draw!");
+            document.getElementById('announcement').textContent = "Draw!";
+            won = true;
+        }
+    }
+
+    const makeMove = (index) => {
+        if (!won && gb.board[index] === '') {
+            gb.addToken(currentPlayer, index);
+            checkWin();
+            if (!won) {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                document.getElementById('announcement').textContent = `${currentPlayer}'s Turn!`;
+            }
+        }
+    }
+
+    // Set onclick for buttons
+    gb.buttons.forEach((button, index) => {
+        button.onclick = () => makeMove(index);
+    });
+
+    return { makeMove, checkWin };
+}
+
+let gb = Gameboard();
+gb.displayBoard();
+let gc = GameController(gb);
